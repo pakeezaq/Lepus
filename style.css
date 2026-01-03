@@ -1,0 +1,582 @@
+/* =======================
+   FONTS
+======================= */
+
+@font-face {
+  font-family: 'ValetiaScript';
+  src: url('assets/fonts/Valetia Script.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('assets/fonts/Montserrat-Regular.ttf') format('truetype');
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('assets/fonts/Montserrat-Medium.ttf') format('truetype');
+  font-weight: 500;
+}
+
+/* =======================
+   ROOT & RESET
+======================= */
+
+:root {
+  --ivory: #f6f3ee;
+  --navy: #1c2331;
+  --tweed: #6b5f4b;
+  --olive: #4a5a3c;
+  --camel: #c2a77d;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--ivory);
+  color: var(--navy);
+  font-family: 'Montserrat', sans-serif;
+  line-height: 1.6;
+  
+}
+
+/* =======================
+   NAVIGATION
+======================= */
+
+.nav {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  padding: 24px 64px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+  transition: background 0.3s ease; /* smooth background transition */
+}
+
+.logo {
+  font-family: 'ValetiaScript', serif;
+  font-size: 92px;
+  letter-spacing: 1px;
+}
+
+.nav-links a {
+  margin-left: 32px;
+  text-decoration: none;
+  color: var(--navy);
+  font-size: 14px;
+}
+
+/* =======================
+   HERO
+======================= */
+
+.hero {
+  position: relative;
+  height: 100vh;
+}
+
+.hero-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.hero-overlay {
+  position: absolute;
+  bottom: 15%;
+  left: 8%;
+  max-width: 420px;
+}
+
+.hero-overlay h1 {
+  font-size: 42px;
+  margin-bottom: 12px;
+  color: #000;
+  font-weight: 500;
+}
+
+.hero-overlay p {
+  font-size: 15px;
+  color: #000;
+}
+
+/* =======================
+   COLLECTION GLIMPSE
+======================= */
+
+.collection-glimpse {
+  padding: 140px 0; /* remove side padding for full-width effect */
+}
+
+.glimpse-grid {
+  display: flex; /* switch from grid to flex for edge-to-edge images */
+}
+
+.glimpse-card {
+  flex: 1; /* each card takes equal space */
+  height: 700px; /* increase height for bigger impact */
+}
+
+.glimpse-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+
+
+/* =======================
+   CAPS SECTION
+======================= */
+
+.caps-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 140px 8%;
+  gap: 80px;
+  align-items: center;
+}
+
+.caps-text h2 {
+  font-size: 32px;
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+
+.caps-text p {
+  color: var(--tweed);
+}
+
+.caps-image {
+  background: var(--olive);
+  height: 560px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* CAPS IMAGE - make bigger */
+.caps-image img {
+  width: 100%;
+  height: 700px; /* same as collection cards */
+  object-fit: cover;
+  object-position: center top;
+}
+
+
+/* =======================
+   FOOTER
+======================= */
+
+/* FOOTER */
+.footer {
+  background: #ebe7df;
+  padding: 120px 8% 60px;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+}
+
+.footer h4 {
+  margin-bottom: 16px; /* remove title for links if not needed */
+  font-weight: 500;
+}
+
+.footer a {
+  display: block;
+  text-decoration: none;
+  color: var(--navy);
+  margin-bottom: 12px;
+  font-size: 15px;
+  line-height: 1.8; /* vertical spacing */
+}
+
+.footer-note {
+  text-align: center;
+  margin-top: 80px;
+  font-size: 12px;
+  color: var(--tweed);
+}
+
+
+/* =======================
+   ANIMATIONS
+======================= */
+
+.fade {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 1s ease, transform 1s ease;
+}
+
+.fade.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* =======================
+   RESPONSIVE
+======================= */
+
+@media (max-width: 1024px) {
+  .glimpse-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .caps-section {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .nav {
+    padding: 16px 24px;
+  }
+
+  .nav-links a {
+    margin-left: 16px;
+  }
+
+  .hero-overlay {
+    left: 6%;
+    right: 6%;
+    bottom: 10%;
+  }
+
+  .hero-overlay h1 {
+    font-size: 32px;
+  }
+
+   .glimpse-grid {
+    flex-direction: column;
+  }
+
+  .glimpse-card {
+    height: 500px; /* scale down for mobile */
+  }
+
+  .footer-grid {
+    gap: 40px;
+  }
+}
+
+/* =======================
+   SHOP MEN PAGE
+======================= */
+
+/* SHOP HERO */
+.shop-hero {
+  padding: 160px 8% 80px; /* avoid nav overlap */
+  text-align: center;
+}
+
+.shop-hero h1 {
+  font-size: 44px;
+  font-weight: 500;
+  
+}
+
+.shop-hero p {
+  font-size: 18px;
+  color: var(--tweed);
+  margin-top: 12px;
+}
+
+/* PRODUCTS GRID */
+.products-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 80px;
+  padding: 0 8%;
+}
+
+/* LANDSCAPE PRODUCT */
+.product-card.landscape {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+   display: block;
+  text-decoration: none; /* remove underline */
+  color: inherit;        
+}
+
+.product-card.landscape img {
+  width: 100%;
+  max-height: 500px;
+  object-fit: contain;
+}
+
+.product-card.landscape h3,
+.product-card.landscape p {
+  margin-top: 12px;
+}
+
+/* PORTRAIT PRODUCT */
+.product-card.portrait {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+
+.product-card.portrait img {
+  width: 50%;
+  object-fit: contain;
+}
+
+.product-card.portrait .product-info {
+  flex: 1;
+}
+
+.product-card.portrait h3 {
+  font-size: 24px;
+  margin-bottom: 6px;
+}
+
+.product-card.portrait p {
+  font-size: 18px;
+  color: var(--tweed);
+}
+
+/* Alternate portrait layout: even = image right, text left */
+.product-card.portrait:nth-of-type(even) {
+  flex-direction: row-reverse;
+}
+
+/* Fade animations */
+.fade {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 1s ease, transform 1s ease;
+}
+
+.fade.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* RESPONSIVE */
+@media (max-width: 1024px) {
+  .product-card.portrait {
+    flex-direction: column !important;
+    text-align: center;
+  }
+
+  .product-card.portrait img {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .shop-hero h1 {
+    font-size: 32px;
+  }
+
+  .shop-hero p {
+    font-size: 16px;
+  }
+
+  .products-grid {
+    gap: 60px;
+  }
+}
+
+/* =======================
+   CAPS PAGE
+======================= */
+
+.caps-grid {
+  padding: 0 8% 140px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 80px 60px;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.cap-card {
+  text-align: center;
+}
+
+.cap-card img {
+  width: 100%;
+  height: 360px;
+  object-fit: cover;
+  background: none;
+}
+
+
+.cap-card h3 {
+  margin-top: 20px;
+  font-size: 20px;
+  font-weight: 500;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.cap-card p {
+  font-size: 14px;
+  color: var(--tweed);
+  margin-top: 4px;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.cap-card span {
+  display: block;
+  margin-top: 8px;
+  font-size: 15px;
+  color: var(--navy);
+}
+
+/* RESPONSIVE CAPS */
+@media (max-width: 1024px) {
+  .caps-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .caps-grid {
+    grid-template-columns: 1fr;
+    gap: 60px;
+  }
+
+  .cap-card img {
+    height: 300px;
+  }
+}
+
+/* =======================
+   PERFUME PAGE
+======================= */
+
+.perfume-display {
+  display: flex;
+  gap: 80px;
+  padding: 140px 8%;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.perfume-image {
+  flex: 1;
+  min-width: 300px;
+   object-fit: cover;
+  background: none;
+}
+
+.perfume-image img {
+  width: 100%;
+  max-width: 450px;
+  object-fit: cover;
+  background: none;
+  border-radius: 12px;
+}
+
+.perfume-info {
+  flex: 1;
+  min-width: 300px;
+}
+
+.perfume-info h2 {
+  font-size: 28px;
+  margin-bottom: 8px;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.perfume-info .original-price {
+  font-size: 16px;
+  color: #999;
+  text-decoration: line-through;
+}
+
+.perfume-info .current-price {
+  font-size: 20px;
+  color: var(--navy);
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.quantity-cart {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.quantity-cart input[type="number"] {
+  width: 60px;
+  padding: 4px 8px;
+}
+
+.quantity-cart button {
+  padding: 6px 12px;
+  background: var(--navy);
+  color: var(--ivory);
+  border: none;
+  cursor: pointer;
+}
+
+.additional-actions button {
+  margin-right: 12px;
+  background: none;
+  border: 1px solid var(--navy);
+  color: var(--navy);
+  padding: 6px 12px;
+  cursor: pointer;
+  margin-bottom: 12px;
+}
+
+.product-category {
+  font-size: 14px;
+  color: var(--tweed);
+  margin-bottom: 20px;
+}
+
+.product-description h3,
+.product-reviews h3 {
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+
+.product-description p,
+.product-description ul,
+.product-reviews p {
+  font-size: 14px;
+  color: var(--tweed);
+  line-height: 1.6;
+}
+
+.product-description ul {
+  list-style: disc;
+  padding-left: 20px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 1024px) {
+  .perfume-display {
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .perfume-image,
+  .perfume-info {
+    min-width: 100%;
+  }
+
+  .perfume-image img {
+    max-width: 100%;
+    height: auto;
+  }
+}

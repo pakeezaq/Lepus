@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Fonts */
+@font-face {
+  font-family: 'ValetiaScript';
+  src: url('../assets/fonts/Valetia Script.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('../assets/fonts/Montserrat-Regular.ttf') format('truetype');
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('../assets/fonts/Montserrat-Medium.ttf') format('truetype');
+  font-weight: 500;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #f6f3ee;
+  color: #1c2331;
+  font-family: 'Montserrat', sans-serif;
+  line-height: 1.6;
+}
+
+/* Fade-in animations */
+.fade-in {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 1s ease, transform 1s ease;
+}
+
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
