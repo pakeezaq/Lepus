@@ -46,8 +46,8 @@ const ShopWomen = () => {
           return (
             <div
               key={product.id}
-              ref={isLandscape ? null : (el) => (fadeRefs.current[index] = el)}
-              className={isLandscape ? '' : 'fade-in'}
+              ref={(el) => (fadeRefs.current[index] = el)}
+              className="fade-in"
             >
               <ProductCard
                 product={product}

@@ -11,6 +11,8 @@ const ProductCard = ({ product, layout = 'landscape' }) => {
           src={product.image}
           alt={product.name}
           className="w-full md:w-1/2 object-contain transition-transform duration-300 group-hover:scale-105"
+          loading="lazy"
+          decoding="async"
         />
         <div className="flex-1 text-center md:text-left">
           <h3 className="text-2xl mb-2 font-medium">{product.name}</h3>
@@ -32,6 +34,8 @@ const ProductCard = ({ product, layout = 'landscape' }) => {
           src={product.image}
           alt={product.name}
           className="w-full h-auto aspect-[3/4] md:aspect-auto object-cover md:object-contain md:max-h-[500px] transition-transform duration-300 group-hover:scale-105"
+          loading="lazy"
+          decoding="async"
         />
       </div>
       <div className="text-center md:text-center w-full">

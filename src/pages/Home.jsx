@@ -66,6 +66,8 @@ const Home = () => {
               src="/assets/images/hero/wardrobe-1.jpeg"
               alt="Sandstone Half-Zip Knit"
               className="w-full h-full object-cover object-center transition-opacity group-hover:opacity-90"
+              loading="lazy"
+              decoding="async"
             />
           </Link>
           <Link to="/shop-women" className="flex-1 h-[500px] md:h-[700px] cursor-pointer group">
@@ -73,6 +75,8 @@ const Home = () => {
               src="/assets/images/hero/wardrobe-2.png"
               alt="Harrington Oversized Pullover — Smoked Charcoal"
               className="w-full h-full object-cover object-center transition-opacity group-hover:opacity-90"
+              loading="lazy"
+              decoding="async"
             />
           </Link>
           <Link to="/shop-women" className="flex-1 h-[500px] md:h-[700px] cursor-pointer group">
@@ -80,6 +84,8 @@ const Home = () => {
               src="/assets/images/hero/wardrobe-3.jpeg"
               alt="Core Pullover — Forest Green"
               className="w-full h-full object-cover object-center transition-opacity group-hover:opacity-90"
+              loading="lazy"
+              decoding="async"
             />
           </Link>
         </div>
