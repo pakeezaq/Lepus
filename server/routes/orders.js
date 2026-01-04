@@ -19,17 +19,26 @@ const ADMIN_EMAIL = process.env.ADMIN_EMAIL
 // --- Nodemailer Setup ---
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-  port: Number(process.env.EMAIL_PORT) || 587,
-  secure: false,
+  port: Number(process.env.EMAIL_PORT) || 465,
+  secure: true, // Port 465 requires secure: true
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
   },
+  connectionTimeout: 15000,
+  greetingTimeout: 15000,
+  socketTimeout: 15000,
   tls: { rejectUnauthorized: false }
 })
 
-// Optional: Verify connection on load (non-blocking)
-transporter.verify().then(() => console.log('[Email] Server Ready')).catch(e => console.warn('[Email] Startup Warn:', e.message))
+// Verify connection on startup
+transporter.verify((error, success) => {
+  if (error) {
+    console.error('[Email] SMTP Connection Error:', error.message)
+  } else {
+    console.log('[Email] SMTP Server is ready (Port 465)')
+  }
+})
 
 const sendEmail = async (to, subject, htmlContent) => {
   try {
