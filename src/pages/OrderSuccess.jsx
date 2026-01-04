@@ -22,18 +22,31 @@ const OrderSuccess = () => {
         </svg>
         <h1 className="text-4xl font-medium mb-4">Order Placed Successfully!</h1>
         {orderId && (
-          <p className="text-lg text-tweed mb-2">Order #: {orderId}</p>
+          <p className="text-lg text-tweed mb-4">Order #: {orderId}</p>
         )}
-        <p className="text-tweed">
-          {location.state?.note || (
-            paymentMethod === 'cod'
+
+        <p className="text-tweed mb-4">
+          {(location.state?.note && location.state.note !== 'Order placed successfully.')
+            ? location.state.note
+            : (paymentMethod === 'cod'
               ? 'You will receive a confirmation email shortly. Please have cash ready for delivery.'
-              : 'You will receive a confirmation email shortly with your order details.'
-          )}
+              : 'You will receive a confirmation email shortly with your order details.')
+          }
         </p>
-        {location.state?.note && (
-          <p className="text-sm text-tweed mt-2">{location.state.note}</p>
-        )}
+
+        {/* Status Notifications */}
+        <div className="space-y-2">
+          {(location.state?.emailStatus === 'failed' || location.state?.details?.emailStatus === 'Failed') && (
+            <div className="bg-yellow-50 text-yellow-800 px-4 py-2 rounded text-sm border border-yellow-200">
+              Note: We couldn't send the confirmation email right now, but your order is safe! Invoice generated.
+            </div>
+          )}
+          {(location.state?.postExStatus === 'failed' || location.state?.details?.postExStatus === 'Failed') && (
+            <div className="bg-blue-50 text-blue-800 px-4 py-2 rounded text-sm border border-blue-200">
+              Courier Status: Our automated courier booking is pending, but our team will handle it manually.
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="bg-footer p-8 rounded mb-8 text-left">

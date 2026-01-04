@@ -1,90 +1,98 @@
-// Email helper functions remain same (lines 24-90) but transporter setup is removed because it's in server.js
+import { normalizeCity } from '../utils/cityNormalizer.js'
+import { generateInvoicePDF } from '../utils/pdfGenerator.js'
+import nodemailer from 'nodemailer'
+import dotenv from 'dotenv'
 
-// Format order email for admin
-const formatAdminEmail = (orderData) => {
-  const itemsList = orderData.items.map(item =>
-    `- ${item.name} (${item.size || 'N/A'}) x${item.quantity} - ₨${(item.price * item.quantity).toLocaleString()}`
-  ).join('\n')
+// Ensure env vars are loaded for top-level constants
+dotenv.config()
+// Fallback: expect .env in CWD (server/) or root
+import path from 'path'
+import { fileURLToPath } from 'url'
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+dotenv.config({ path: path.join(__dirname, '../../.env') })
 
-  return `
-New Order Received - Order #${orderData.orderId}
+// --- Configuration ---
+// Note: dotenv is configured in server.js
+const POSTEX_TOKEN = process.env.POSTEX_TOKEN
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL
 
-Customer Information:
-Name: ${orderData.customer.firstName} ${orderData.customer.lastName}
-Email: ${orderData.customer.email}
-Phone: ${orderData.customer.phone}
-Address: ${orderData.customer.address}
-City: ${orderData.customer.city}
-Postal Code: ${orderData.customer.postalCode}
+// --- Nodemailer Setup ---
+const transporter = nodemailer.createTransport({
+  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+  port: Number(process.env.EMAIL_PORT) || 587,
+  secure: false,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  },
+  tls: { rejectUnauthorized: false }
+})
 
-Order Details:
-${itemsList}
+// Optional: Verify connection on load (non-blocking)
+transporter.verify().then(() => console.log('[Email] Server Ready')).catch(e => console.warn('[Email] Startup Warn:', e.message))
 
-Subtotal: ₨${orderData.subtotal.toLocaleString()}
-Shipping: ₨${orderData.shipping.toLocaleString()}
-Total: ₨${orderData.total.toLocaleString()}
-
-Payment Method: ${orderData.paymentMethod}
-Order Date: ${new Date(orderData.orderDate).toLocaleString()}
-  `.trim()
-}
-
-// Format order confirmation email for customer
-const formatCustomerEmail = (orderData) => {
-  const itemsList = orderData.items.map(item =>
-    `- ${item.name}${item.size ? ` (Size: ${item.size})` : ''} x${item.quantity} - ₨${(item.price * item.quantity).toLocaleString()}`
-  ).join('\n')
-
-  return `
-Thank you for your order!
-
-Order #${orderData.orderId}
-
-Dear ${orderData.customer.firstName},
-
-We've received your order and will process it shortly.
-
-Order Summary:
-${itemsList}
-
-Subtotal: ₨${orderData.subtotal.toLocaleString()}
-Shipping: ₨${orderData.shipping.toLocaleString()}
-Total: ₨${orderData.total.toLocaleString()}
-
-Shipping Address:
-${orderData.customer.firstName} ${orderData.customer.lastName}
-${orderData.customer.address}
-${orderData.customer.city}, ${orderData.customer.postalCode}
-Phone: ${orderData.customer.phone}
-
-Payment Method: ${orderData.paymentMethod}
-
-We'll send you a confirmation once your order ships.
-
-Thank you for choosing Lepus!
-
-Best regards,
-Lepus Team
-  `.trim()
-}
-
-// Posex Token
-const POSTEX_TOKEN = 'ODUyYTA0OGZlODY1NDljN2FhZmExNTMxOTBmOGRkODE6MDg5ZmQ2MjE3Y2U0NDIxOGI0NDcxNDk5ZDU3NDJlZDE='
-
-export const createOrder = async (req, res) => {
+const sendEmail = async (to, subject, htmlContent) => {
   try {
-    const {
-      customer,
-      items,
-      subtotal,
-      shipping,
-      total,
-      paymentMethod,
-      paymentIntentId
-    } = req.body
+    const info = await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to,
+      subject,
+      html: htmlContent
+    })
+    console.log('[Email] Sent:', info.messageId)
+    return { success: true, id: info.messageId }
+  } catch (err) {
+    console.error('[Email] Failed:', err.message)
+    return { success: false, error: err.message }
+  }
+}
 
-    // Generate order ID
-    const orderId = `LEP-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+// --- PostEx Helper ---
+const sendToPostExWithRetry = async (payload, retries = 2) => {
+  let lastError = null
+  for (let i = 0; i <= retries; i++) {
+    try {
+      if (i > 0) console.log(`[PostEx] Retry Attempt ${i + 1}/${retries}...`)
+      console.log('[PostEx Payload]', JSON.stringify(payload, null, 2))
+
+      const response = await fetch('https://api.postex.pk/services/integration/api/order/v3/create-order', {
+        method: 'POST',
+        headers: {
+          'token': POSTEX_TOKEN,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(15000)
+      })
+
+      const result = await response.json()
+
+      if (
+        result.statusCode === '200' ||
+        result.statusCode === 200 ||
+        result.status === 'success' ||
+        result.message === 'Success'
+      ) {
+        const tracking = result.orderTrackingNumber || result.trackingNumber || result.message || 'Created'
+        return { success: true, tracking }
+      } else {
+        throw new Error(result.message || JSON.stringify(result))
+      }
+    } catch (error) {
+      console.warn(`[PostEx] Attempt ${i + 1} failed:`, error.message)
+      lastError = error
+      if (i < retries) await new Promise(res => setTimeout(res, 1000 + i * 1000))
+    }
+  }
+  return { success: false, error: lastError }
+}
+
+// --- Main Order Handler ---
+export const createOrder = async (req, res) => {
+  const orderId = `LEP-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`
+
+  try {
+    const { customer, items, subtotal, shipping, total, paymentMethod, paymentIntentId } = req.body
 
     const orderData = {
       orderId,
@@ -99,208 +107,127 @@ export const createOrder = async (req, res) => {
       status: paymentMethod === 'cod' ? 'pending' : 'paid'
     }
 
-    // --- PostEx Integration ---
-    let postExTracking = null
+    console.log(`[Order] Processing ${orderId} for ${customer.firstName}...`)
+
+    // --- 1. Generate PDF Invoice for PostEx only ---
     try {
-      // Calculate total quantity
-      const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
-
-      // Construct payload
-      const postExPayload = {
-        "orderRefNumber": orderId,
-        "invoicePayment": total.toString(),
-        "customerName": `${customer.firstName} ${customer.lastName}`,
-        "customerPhone": customer.phone,
-        "deliveryAddress": `${customer.address}, ${customer.city}`,
-        "cityName": customer.city,
-        "invoiceDivision": 1,
-        "items": totalItems,
-        "pickupAddressCode": "001",
-        "orderType": "Normal",
-        "orderDetail": items.map(i => `${i.name} x${i.quantity}`).join(', '),
-        "transactionNotes": "Order via Website"
-      }
-
-      console.log('Sending order to PostEx...', JSON.stringify(postExPayload, null, 2))
-
-      const postExResponse = await fetch('https://api.postex.pk/services/integration/api/order/v3/create-order', {
-        method: 'POST',
-        headers: {
-          'token': POSTEX_TOKEN,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(postExPayload)
-      })
-
-      const postExResult = await postExResponse.json()
-      console.log('PostEx Response:', postExResult)
-
-      if (postExResult.statusCode === '200' || postExResult.statusCode === 200 || postExResult.status === 'success') {
-        postExTracking = postExResult.message || 'Sent to Courier'
-      } else {
-        console.warn('PostEx Error:', postExResult)
-      }
-
-    } catch (postExError) {
-      console.error('Failed to send order to PostEx:', postExError)
-      // Continue to send success response to user regardless
+      await generateInvoicePDF(orderData)
+    } catch (pdfErr) {
+      console.error('[Invoice] Generation failed, proceeding...', pdfErr.message)
     }
 
-    // --- Email Sending ---
-    // Use the transporter passed from server.js (middleware)
-    const transporter = req.transporter
+    // --- 2. Prepare PostEx Payload ---
+    const normalizedCity = normalizeCity(customer.city)
+    const totalQty = items.reduce((acc, item) => acc + item.quantity, 0)
 
-    if (transporter) {
-      // Send email to admin
-      const adminMailOptions = {
-        from: process.env.EMAIL_USER,
-        to: process.env.ADMIN_EMAIL || 'nizaam.ilm@gmail.com',
-        subject: `New Order #${orderId} - Lepus`,
-        text: formatAdminEmail(orderData),
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #1c2331;">New Order Received</h2>
-            <p><strong>Order #${orderId}</strong></p>
-            
-            <h3>Customer Information:</h3>
-            <p>
-              <strong>Name:</strong> ${customer.firstName} ${customer.lastName}<br>
-              <strong>Email:</strong> ${customer.email}<br>
-              <strong>Phone:</strong> ${customer.phone}<br>
-              <strong>Address:</strong> ${customer.address}<br>
-              <strong>City:</strong> ${customer.city}<br>
-              <strong>Postal Code:</strong> ${customer.postalCode}
-            </p>
-            
-            <h3>Order Details:</h3>
-            <ul>
-              ${items.map(item => `
-                <li>
-                  ${item.name} ${item.size ? `(${item.size})` : ''} x${item.quantity} - 
-                  ₨${(item.price * item.quantity).toLocaleString()}
-                </li>
-              `).join('')}
-            </ul>
-            
-            <p>
-              <strong>Subtotal:</strong> ₨${subtotal.toLocaleString()}<br>
-              <strong>Shipping:</strong> ₨${shipping.toLocaleString()}<br>
-              <strong>Total:</strong> ₨${total.toLocaleString()}
-            </p>
-            
-            <p>
-              <strong>Payment Method:</strong> ${paymentMethod}<br>
-              <strong>Order Date:</strong> ${new Date(orderData.orderDate).toLocaleString()}
-            </p>
-            
-            ${postExTracking ? `<p><strong>Courier Status:</strong> Sent to PostEx</p>` : ''}
-          </div>
-        `
-      }
-
-      // Send email to customer
-      const customerMailOptions = {
-        from: process.env.EMAIL_USER,
-        to: customer.email,
-        subject: `Order Confirmation #${orderId} - Lepus`,
-        text: formatCustomerEmail(orderData),
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <h2 style="color: #1c2331;">Thank you for your order!</h2>
-            <p><strong>Order #${orderId}</strong></p>
-            
-            <p>Dear ${customer.firstName},</p>
-            <p>We've received your order and will process it shortly.</p>
-            
-            <h3>Order Summary:</h3>
-            <ul>
-              ${items.map(item => `
-                <li>
-                  ${item.name}${item.size ? ` (Size: ${item.size})` : ''} x${item.quantity} - 
-                  ₨${(item.price * item.quantity).toLocaleString()}
-                </li>
-              `).join('')}
-            </ul>
-            
-            <p>
-              <strong>Subtotal:</strong> ₨${subtotal.toLocaleString()}<br>
-              <strong>Shipping:</strong> ₨${shipping.toLocaleString()}<br>
-              <strong>Total:</strong> ₨${total.toLocaleString()}
-            </p>
-            
-            <h3>Shipping Address:</h3>
-            <p>
-              ${customer.firstName} ${customer.lastName}<br>
-              ${customer.address}<br>
-              ${customer.city}, ${customer.postalCode}<br>
-              Phone: ${customer.phone}
-            </p>
-            
-            <p><strong>Payment Method:</strong> ${paymentMethod}</p>
-            
-            <p>We'll send you a confirmation once your order ships.</p>
-            
-            <p>Thank you for choosing Lepus!</p>
-            
-            <p>Best regards,<br>Lepus Team</p>
-          </div>
-        `
-      }
-
-      // Send both emails (with error handling)
-      try {
-        await Promise.all([
-          transporter.sendMail(adminMailOptions),
-          transporter.sendMail(customerMailOptions)
-        ])
-        console.log('Emails sent successfully')
-      } catch (emailError) {
-        console.error('Error sending emails:', emailError)
-        // Don't fail the order if email fails
-      }
-    } else {
-      console.warn('Transporter not available - skipping emails')
+    const postExPayload = {
+      orderRefNumber: orderId,
+      invoicePayment: total.toString(),
+      customerName: `${customer.firstName} ${customer.lastName}`,
+      customerPhone: customer.phone,
+      deliveryAddress: `${customer.address}, ${customer.city}`,
+      cityName: normalizedCity,
+      invoiceDivision: 1,
+      items: totalQty,
+      pickupAddressCode: "001", // validate with PostEx
+      orderType: "Normal",
+      orderDetail: items.map(i => `${i.name} (${i.size})`).join(', '),
+      transactionNotes: "Lepus Website Order"
+      // Optionally add: pdfUrl if PostEx requires
     }
 
+    const postExResult = await sendToPostExWithRetry(postExPayload)
+    const postExStatus = postExResult.success ? 'success' : 'failed'
+    if (!postExResult.success) console.warn('[PostEx] Failed:', postExResult.error?.message)
+    if (postExStatus === 'success') console.log('[PostEx] Success:', postExResult.tracking)
+
+    // --- 3. Prepare Email Content ---
+    const websiteUrl = 'https://lepus.com.pk' // Or your Render URL if different for now
+
+    // Construct nicer item list with images
+    const itemsHtml = items.map(i => {
+      // Correctly handle relative image paths to be absolute URLs
+      const imageUrl = i.image.startsWith('http') ? i.image : `${websiteUrl}${i.image}`
+
+      return `
+        <div style="display: flex; gap: 16px; margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 12px;">
+           <img src="${imageUrl}" alt="${i.name}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px;" />
+           <div>
+              <p style="margin: 0; font-weight: bold; color: #333;">${i.name}</p>
+              <p style="margin: 4px 0 0; color: #666; font-size: 14px;">Size: ${i.size || 'N/A'} | Qty: ${i.quantity}</p>
+              <p style="margin: 4px 0 0; color: #1c2331; font-weight: 500;">Rs ${i.price.toLocaleString()}</p>
+           </div>
+        </div>
+       `
+    }).join('')
+
+    const commonHtml = `
+      <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
+        <div style="text-align: center; margin-bottom: 24px;">
+           <h2 style="color: #1c2331; letter-spacing: 1px; margin-bottom: 8px;">LEPUS.</h2>
+           <p style="color: #666; font-size: 14px; margin: 0;">Order #${orderId}</p>
+        </div>
+
+        <div style="background-color: #f9fafb; padding: 16px; border-radius: 6px; margin-bottom: 24px;">
+           <h3 style="margin-top: 0; font-size: 16px; color: #1c2331;">Order Summary</h3>
+           ${itemsHtml}
+           <div style="display: flex; justify-content: space-between; margin-top: 16px; font-weight: bold; border-top: 2px solid #ddd; padding-top: 12px;">
+              <span>Total</span>
+              <span>Rs ${total.toLocaleString()}</span>
+           </div>
+        </div>
+
+        <div style="margin-bottom: 24px;">
+           <h3 style="font-size: 16px; color: #1c2331; border-bottom: 1px solid #eee; padding-bottom: 8px;">Shipping Details</h3>
+           <p style="margin: 8px 0; line-height: 1.5;">
+             ${customer.firstName} ${customer.lastName}<br>
+             ${customer.address}<br>
+             ${customer.city}, ${customer.postalCode}<br>
+             ${customer.phone}
+           </p>
+           <p style="margin-top: 12px;"><strong>Payment Method:</strong> ${paymentMethod.toUpperCase()}</p>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px; font-size: 12px; color: #999;">
+           <p>Thank you for choosing Lepus.</p>
+           <p>&copy; ${new Date().getFullYear()} Lepus. All rights reserved.</p>
+        </div>
+      </div>
+    `
+
+    // Send emails concurrently
+    const [adminRes, customerRes] = await Promise.all([
+      sendEmail(ADMIN_EMAIL, `New Order ${orderId}`, `<h2>New Order Received</h2>${commonHtml}<p><strong>PostEx Status:</strong> ${postExStatus} ${!postExResult.success ? `(${postExResult.error?.message})` : ''}</p>`),
+      sendEmail(customer.email, `Order Confirmation ${orderId}`, commonHtml)
+    ])
+
+    const emailStatus = (adminRes.success && customerRes.success) ? 'success' : 'failed'
+
+    // --- 4. Return Structured Response ---
     res.status(200).json({
+      orderCreated: true,
       success: true,
-      orderId,
-      message: 'Order created successfully and emails sent',
-      postExStatus: postExTracking ? 'Order pushed to PostEx' : 'PostEx push failed or skipped'
+      orderNumber: orderId,
+      postExStatus,
+      emailStatus
     })
 
-  } catch (error) {
-    console.error('Error creating order:', error)
+  } catch (err) {
+    console.error('[Order] CRITICAL FAILURE:', err)
     res.status(500).json({
+      orderCreated: false,
       success: false,
-      message: 'Failed to create order',
-      error: error.message
+      orderNumber: orderId || null,
+      postExStatus: 'failed',
+      emailStatus: 'failed',
+      error: err.message
     })
   }
 }
 
 export const processPayment = async (req, res) => {
-  try {
-    const { paymentIntentId, orderData } = req.body
-
-    // Here you would verify the payment with Stripe
-    // For now, we'll just create the order
-    if (orderData) {
-      return createOrder({ body: orderData }, res)
-    }
-
-    res.status(200).json({
-      success: true,
-      message: 'Payment processed successfully'
-    })
-
-  } catch (error) {
-    console.error('Error processing payment:', error)
-    res.status(500).json({
-      success: false,
-      message: 'Failed to process payment',
-      error: error.message
-    })
+  if (req.body.orderData) {
+    return createOrder({ body: req.body.orderData }, res)
   }
+  res.json({ success: true })
 }
-

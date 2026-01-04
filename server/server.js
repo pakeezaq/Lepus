@@ -1,52 +1,47 @@
 import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
-import nodemailer from 'nodemailer'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { createOrder, processPayment } from './routes/orders.js'
 import { createPaymentIntent } from './routes/payments.js'
-
-dotenv.config() // load .env safely
+import fs from 'fs'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
+
+// Robust .env loading
+const envPaths = [
+  path.join(__dirname, '.env'), // server/.env
+  path.join(__dirname, '../.env') // root .env
+]
+
+let envLoaded = false
+for (const envPath of envPaths) {
+  if (fs.existsSync(envPath)) {
+    console.log(`Loading .env from: ${envPath}`)
+    dotenv.config({ path: envPath })
+    envLoaded = true
+    break
+  }
+}
+
+if (!envLoaded) {
+  console.warn('WARNING: No .env file found in server/ or root! process.env might be empty.')
+} else {
+  // Debug critical vars (partial)
+  console.log('Environment Check:')
+  console.log('- POSTEX_TOKEN:', process.env.POSTEX_TOKEN ? 'Loaded' : 'MISSING')
+  console.log('- EMAIL_USER:', process.env.EMAIL_USER ? 'Loaded' : 'MISSING')
+  console.log('- EMAIL_HOST:', process.env.EMAIL_HOST ? 'Loaded' : 'MISSING')
+}
 
 const app = express()
 const PORT = process.env.PORT || 5000
 
 // Middleware
-app.use(cors()) // Allow all origins for simplicity in this transition, or strictly same-origin by default
+app.use(cors())
 app.use(express.json())
-
-// --- Nodemailer setup ---
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  },
-  tls: {
-    rejectUnauthorized: false
-  }
-})
-
-// Verify email server
-transporter.verify((error, success) => {
-  if (error) {
-    console.log('Email configuration error:', error.message)
-  } else {
-    console.log('Email server is ready to send messages')
-  }
-})
-
-// Attach transporter to req so routes can use it
-app.use((req, res, next) => {
-  req.transporter = transporter
-  next()
-})
 
 // Serve Static Frontend Files
 // serve from the dist folder which is one level up from server/

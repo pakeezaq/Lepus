@@ -63,12 +63,26 @@ const Checkout = () => {
 
         const result = await response.json()
 
-        if (result.success) {
+        if (result.orderCreated || result.success) {
           clearCart()
+
+          // Determine status messages for UI based on new specific flags
+          let statusMessage = 'Order placed successfully.'
+          if (result.postExStatus === 'failed' || result?.details?.postExStatus === 'Failed') {
+            statusMessage += ' (Courier pending)'
+          }
+          if (result.emailStatus === 'failed' || result?.details?.emailStatus === 'Failed') {
+            statusMessage += ' (Email delayed)'
+          }
+
           navigate('/order-success', {
             state: {
-              orderId: result.orderId || fallbackOrderId,
-              paymentMethod: paymentMethod
+              orderId: result.orderNumber || result.orderId || fallbackOrderId,
+              paymentMethod: paymentMethod,
+              note: statusMessage,
+              // Pass new flags forward
+              postExStatus: result.postExStatus,
+              emailStatus: result.emailStatus
             }
           })
           return
@@ -93,7 +107,7 @@ const Checkout = () => {
           state: {
             orderId: fallbackOrderId,
             paymentMethod: paymentMethod,
-            note: 'Order placed successfully. Email notifications require backend server.'
+            note: 'Order placed successfully. Email confirmation may be delayed.'
           }
         })
       }
