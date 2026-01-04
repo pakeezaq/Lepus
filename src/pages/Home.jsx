@@ -37,6 +37,7 @@ const Home = () => {
           muted
           loop
           playsInline
+          preload="metadata"
           className="w-full h-full object-cover"
           style={{ objectPosition: 'center top' }}
         >

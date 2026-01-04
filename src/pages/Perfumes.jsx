@@ -51,6 +51,8 @@ const Perfumes = () => {
             <img
               src={product.image}
               alt={product.name}
+              loading="lazy"
+              decoding="async"
               className="w-full max-h-[500px] object-contain mb-3 transition-transform duration-300 group-hover:scale-105"
             />
             <h3 className="text-xl mb-1 font-medium">{product.name}</h3>

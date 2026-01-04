@@ -52,6 +52,8 @@ const Caps = () => {
               <img
                 src={product.image}
                 alt={product.name}
+                loading="lazy"
+                decoding="async"
                 className="w-full h-[360px] object-cover mb-5 transition-transform duration-300 group-hover:scale-105"
               />
               {product.inStock === false && (
