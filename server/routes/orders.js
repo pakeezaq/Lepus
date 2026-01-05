@@ -19,22 +19,24 @@ const ADMIN_EMAIL = 'orders@lepus.com.pk'
 // --- Nodemailer Setup ---
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST || 'smtp.zoho.com',
-  port: Number(process.env.EMAIL_PORT) || 465,
-  secure: process.env.EMAIL_SECURE === 'true' || true,
+  port: 587,
+  secure: false,
   auth: {
-    user: 'orders@lepus.com.pk',
+    user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
   },
+  connectionTimeout: 20000,
+  greetingTimeout: 20000,
+  socketTimeout: 20000,
   tls: { rejectUnauthorized: false }
 })
 
-// Optional: Verify connection on load (non-blocking)
-transporter.verify().then(() => console.log('[Email] Server Ready')).catch(e => console.warn('[Email] Startup Warn:', e.message))
+// Transporter verify removed for Render compatibility
 
 const sendEmail = async (to, subject, htmlContent) => {
   try {
     const info = await transporter.sendMail({
-      from: 'orders@lepus.com.pk',
+      from: process.env.EMAIL_USER,
       to,
       subject,
       html: htmlContent
@@ -195,21 +197,30 @@ export const createOrder = async (req, res) => {
       </div>
     `
 
-    // Send emails concurrently
-    const [adminRes, customerRes] = await Promise.all([
-      sendEmail(ADMIN_EMAIL, `New Order ${orderId}`, `<h2>New Order Received</h2>${commonHtml}<p><strong>PostEx Status:</strong> ${postExStatus} ${!postExResult.success ? `(${postExResult.error?.message})` : ''}</p>`),
-      sendEmail(customer.email, `Order Confirmation ${orderId}`, commonHtml)
-    ])
+    // --- 4. Send Emails (Non-blocking) ---
+    // We trigger this but don't await it to ensure fast response and no blocking
+    const sendOrderEmails = async () => {
+      try {
+        const [adminRes, customerRes] = await Promise.all([
+          sendEmail(ADMIN_EMAIL, `New Order ${orderId}`, `<h2>New Order Received</h2>${commonHtml}<p><strong>PostEx Status:</strong> ${postExStatus} ${!postExResult.success ? `(${postExResult.error?.message})` : ''}</p>`),
+          sendEmail(customer.email, `Order Confirmation ${orderId}`, commonHtml)
+        ])
+        console.log(`[Email] Status for ${orderId}: Admin=${adminRes.success}, Customer=${customerRes.success}`)
+      } catch (err) {
+        console.error(`[Email] Critical async error for ${orderId}:`, err.message)
+      }
+    }
 
-    const emailStatus = (adminRes.success && customerRes.success) ? 'success' : 'failed'
+    // Fire and forget (errors are caught inside sendOrderEmails and sendEmail)
+    sendOrderEmails()
 
-    // --- 4. Return Structured Response ---
+    // --- 5. Return Structured Response ---
     res.status(200).json({
       orderCreated: true,
       success: true,
       orderNumber: orderId,
       postExStatus,
-      emailStatus
+      emailStatus: 'pending' // Status is now delegated to async task
     })
 
   } catch (err) {
