@@ -32,8 +32,7 @@ if (!envLoaded) {
   // Debug critical vars (partial)
   console.log('Environment Check:')
   console.log('- POSTEX_TOKEN:', process.env.POSTEX_TOKEN ? 'Loaded' : 'MISSING')
-  console.log('- EMAIL_USER:', process.env.EMAIL_USER ? 'Loaded' : 'MISSING')
-  console.log('- EMAIL_HOST:', process.env.EMAIL_HOST ? 'Loaded' : 'MISSING')
+  console.log('- RESEND_API_KEY:', process.env.RESEND_API_KEY ? 'Loaded' : 'MISSING')
 }
 
 const app = express()

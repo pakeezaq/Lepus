@@ -1,6 +1,6 @@
 import { normalizeCity } from '../utils/cityNormalizer.js'
 import { generateInvoicePDF } from '../utils/pdfGenerator.js'
-import nodemailer from 'nodemailer'
+import { Resend } from 'resend'
 import dotenv from 'dotenv'
 
 // Ensure env vars are loaded for top-level constants
@@ -12,39 +12,31 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 dotenv.config({ path: path.join(__dirname, '../../.env') })
 
 // --- Configuration ---
-// Note: dotenv is configured in server.js
 const POSTEX_TOKEN = process.env.POSTEX_TOKEN
 const ADMIN_EMAIL = 'orders@lepus.com.pk'
+const RESEND_API_KEY = process.env.RESEND_API_KEY
 
-// --- Nodemailer Setup ---
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || 'smtp.zoho.com',
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  },
-  connectionTimeout: 20000,
-  greetingTimeout: 20000,
-  socketTimeout: 20000,
-  tls: { rejectUnauthorized: false }
-})
-
-// Transporter verify removed for Render compatibility
+// --- Resend Setup ---
+const resend = new Resend(RESEND_API_KEY)
 
 const sendEmail = async (to, subject, htmlContent) => {
   try {
-    const info = await transporter.sendMail({
-      from: process.env.EMAIL_USER,
+    const { data, error } = await resend.emails.send({
+      from: 'orders@lepus.com.pk',
       to,
       subject,
       html: htmlContent
     })
-    console.log('[Email] Sent:', info.messageId)
-    return { success: true, id: info.messageId }
+
+    if (error) {
+      console.error('[Email] Resend Error:', error)
+      return { success: false, error: error.message }
+    }
+
+    console.log('[Email] Sent via Resend:', data.id)
+    return { success: true, id: data.id }
   } catch (err) {
-    console.error('[Email] Failed:', err.message)
+    console.error('[Email] Critical Failure:', err.message)
     return { success: false, error: err.message }
   }
 }
@@ -197,30 +189,21 @@ export const createOrder = async (req, res) => {
       </div>
     `
 
-    // --- 4. Send Emails (Non-blocking) ---
-    // We trigger this but don't await it to ensure fast response and no blocking
-    const sendOrderEmails = async () => {
-      try {
-        const [adminRes, customerRes] = await Promise.all([
-          sendEmail(ADMIN_EMAIL, `New Order ${orderId}`, `<h2>New Order Received</h2>${commonHtml}<p><strong>PostEx Status:</strong> ${postExStatus} ${!postExResult.success ? `(${postExResult.error?.message})` : ''}</p>`),
-          sendEmail(customer.email, `Order Confirmation ${orderId}`, commonHtml)
-        ])
-        console.log(`[Email] Status for ${orderId}: Admin=${adminRes.success}, Customer=${customerRes.success}`)
-      } catch (err) {
-        console.error(`[Email] Critical async error for ${orderId}:`, err.message)
-      }
-    }
+    // Send emails concurrently
+    const [adminRes, customerRes] = await Promise.all([
+      sendEmail(ADMIN_EMAIL, `New Order ${orderId}`, `<h2>New Order Received</h2>${commonHtml}<p><strong>PostEx Status:</strong> ${postExStatus} ${!postExResult.success ? `(${postExResult.error?.message})` : ''}</p>`),
+      sendEmail(customer.email, `Order Confirmation ${orderId}`, commonHtml)
+    ])
 
-    // Fire and forget (errors are caught inside sendOrderEmails and sendEmail)
-    sendOrderEmails()
+    const emailStatus = (adminRes.success && customerRes.success) ? 'success' : 'failed'
 
-    // --- 5. Return Structured Response ---
+    // --- 4. Return Structured Response ---
     res.status(200).json({
       orderCreated: true,
       success: true,
       orderNumber: orderId,
       postExStatus,
-      emailStatus: 'pending' // Status is now delegated to async task
+      emailStatus
     })
 
   } catch (err) {
