@@ -14,7 +14,7 @@ const FAQs = () => {
     },
     {
       question: 'How do I exchange an item?',
-      answer: 'To exchange an item, please contact us at Lepus4003@gmail.com or call +92 329 4609497. We will guide you through the exchange process.',
+      answer: 'To exchange an item, please contact us at orders@lepus.com.pk or call +92 329 4609497. We will guide you through the exchange process.',
     },
     {
       question: 'What payment methods do you accept?',
@@ -34,11 +34,11 @@ const FAQs = () => {
     },
     {
       question: 'Can I modify or cancel my order?',
-      answer: 'Orders can be modified or cancelled within 24 hours of placement. Please contact us immediately at Lepus4003@gmail.com if you need to make changes.',
+      answer: 'Orders can be modified or cancelled within 24 hours of placement. Please contact us immediately at orders@lepus.com.pk if you need to make changes.',
     },
     {
       question: 'Do you have a physical store?',
-      answer: 'Yes, our store is located at Valencia Town, Commercial Market, H Block, 7/14 Office, Lahore, Pakistan. You can visit us during business hours.',
+      answer: 'No, we do not have a physical store yet, but we plan to in the future.',
     },
   ]
 
@@ -63,7 +63,7 @@ const FAQs = () => {
           If you can't find the answer you're looking for, please don't hesitate to reach out to us.
         </p>
         <p className="text-navy">
-          Email: <a href="mailto:Lepus4003@gmail.com" className="underline">Lepus4003@gmail.com</a>
+          Email: <a href="mailto:orders@lepus.com.pk" className="underline">orders@lepus.com.pk</a>
           <br />
           Phone: <a href="tel:+923294609497" className="underline">+92 329 4609497</a>
         </p>

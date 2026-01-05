@@ -16,7 +16,12 @@ const ProductCard = ({ product, layout = 'landscape' }) => {
         />
         <div className="flex-1 text-center md:text-left">
           <h3 className="text-2xl mb-2 font-medium">{product.name}</h3>
-          <p className="text-lg text-tweed">₨{product.price.toLocaleString()}</p>
+          <div className="flex items-center justify-center md:justify-start gap-3">
+            {product.originalPrice && (
+              <p className="text-lg text-gray-400 line-through">₨{product.originalPrice.toLocaleString()}</p>
+            )}
+            <p className="text-lg text-tweed">₨{product.price.toLocaleString()}</p>
+          </div>
         </div>
       </Link>
     )
@@ -40,7 +45,12 @@ const ProductCard = ({ product, layout = 'landscape' }) => {
       </div>
       <div className="text-center md:text-center w-full">
         <h3 className="text-xl md:text-xl mb-1 font-medium mt-3">{product.name}</h3>
-        <p className="text-tweed mt-1">₨{product.price.toLocaleString()}</p>
+        <div className="flex items-center justify-center gap-3 mt-1">
+          {product.originalPrice && (
+            <p className="text-gray-400 line-through">₨{product.originalPrice.toLocaleString()}</p>
+          )}
+          <p className="text-tweed">₨{product.price.toLocaleString()}</p>
+        </div>
       </div>
     </Link>
   )

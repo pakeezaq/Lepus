@@ -163,7 +163,12 @@ const ProductDetail = () => {
           </div>
 
           {/* Price */}
-          <div>
+          <div className="flex items-center gap-4">
+            {product.originalPrice && (
+              <p className="text-xl text-gray-400 line-through">
+                ₨{product.originalPrice.toLocaleString()}
+              </p>
+            )}
             <p className="text-2xl font-medium text-navy">
               ₨{product.price.toLocaleString()}
             </p>

@@ -12,7 +12,7 @@ const Footer = () => {
             Lahore, Pakistan<br />
             <br />
             +92 329 4609497<br />
-            Lepus4003@gmail.com
+            orders@lepus.com.pk
           </p>
         </div>
         <div>

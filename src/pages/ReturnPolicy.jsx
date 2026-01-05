@@ -25,7 +25,7 @@ const ReturnPolicy = () => {
         <section>
           <h2 className="text-2xl font-medium text-navy mb-4">How to Return</h2>
           <ol className="list-decimal pl-6 mb-4 space-y-2">
-            <li>Contact us at Lepus4003@gmail.com or call +92 329 4609497 to initiate a return</li>
+            <li>Contact us at orders@lepus.com.pk or call +92 329 4609497 to initiate a return</li>
             <li>Provide your order number and reason for return</li>
             <li>We will provide you with return instructions and a return authorization number</li>
             <li>Package the item securely with the original packaging</li>

@@ -65,7 +65,7 @@ const About = () => {
             Lahore, Pakistan
           </p>
           <p className="text-navy mt-4">
-            <strong>Email:</strong> <a href="mailto:Lepus4003@gmail.com" className="underline">Lepus4003@gmail.com</a>
+            <strong>Email:</strong> <a href="mailto:orders@lepus.com.pk" className="underline">orders@lepus.com.pk</a>
             <br />
             <strong>Phone:</strong> <a href="tel:+923294609497" className="underline">+92 329 4609497</a>
           </p>

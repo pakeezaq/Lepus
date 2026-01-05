@@ -14,36 +14,27 @@ dotenv.config({ path: path.join(__dirname, '../../.env') })
 // --- Configuration ---
 // Note: dotenv is configured in server.js
 const POSTEX_TOKEN = process.env.POSTEX_TOKEN
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL
+const ADMIN_EMAIL = 'orders@lepus.com.pk'
 
 // --- Nodemailer Setup ---
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+  host: process.env.EMAIL_HOST || 'smtp.zoho.com',
   port: Number(process.env.EMAIL_PORT) || 465,
-  secure: true, // Port 465 requires secure: true
+  secure: process.env.EMAIL_SECURE === 'true' || true,
   auth: {
-    user: process.env.EMAIL_USER,
+    user: 'orders@lepus.com.pk',
     pass: process.env.EMAIL_PASS
   },
-  connectionTimeout: 15000,
-  greetingTimeout: 15000,
-  socketTimeout: 15000,
   tls: { rejectUnauthorized: false }
 })
 
-// Verify connection on startup
-transporter.verify((error, success) => {
-  if (error) {
-    console.error('[Email] SMTP Connection Error:', error.message)
-  } else {
-    console.log('[Email] SMTP Server is ready (Port 465)')
-  }
-})
+// Optional: Verify connection on load (non-blocking)
+transporter.verify().then(() => console.log('[Email] Server Ready')).catch(e => console.warn('[Email] Startup Warn:', e.message))
 
 const sendEmail = async (to, subject, htmlContent) => {
   try {
     const info = await transporter.sendMail({
-      from: process.env.EMAIL_USER,
+      from: 'orders@lepus.com.pk',
       to,
       subject,
       html: htmlContent

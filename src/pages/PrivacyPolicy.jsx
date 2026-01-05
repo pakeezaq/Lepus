@@ -92,7 +92,7 @@ const PrivacyPolicy = () => {
             If you have any questions about this Privacy Policy, please contact us:
           </p>
           <p className="text-navy">
-            Email: <a href="mailto:Lepus4003@gmail.com" className="underline">Lepus4003@gmail.com</a>
+            Email: <a href="mailto:orders@lepus.com.pk" className="underline">orders@lepus.com.pk</a>
             <br />
             Phone: <a href="tel:+923294609497" className="underline">+92 329 4609497</a>
             <br />
