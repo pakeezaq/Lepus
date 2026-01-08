@@ -1,8 +1,19 @@
+import { useEffect } from 'react'
 import { useLocation, Link } from 'react-router-dom'
 
 const OrderSuccess = () => {
   const location = useLocation()
   const { orderId, paymentMethod } = location.state || {}
+
+  useEffect(() => {
+    // Meta Pixel Purchase Event
+    if (window.fbq) {
+      window.fbq('track', 'Purchase', {
+        value: 0, // Using static value as dynamic is not available in state
+        currency: 'PKR'
+      });
+    }
+  }, []);
 
   return (
     <div className="pt-40 pb-20 px-8 md:px-16 text-center max-w-2xl mx-auto">

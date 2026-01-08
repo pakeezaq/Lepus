@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,7 +12,8 @@
     .product-page {
       display: flex;
       flex-wrap: wrap;
-      padding: 200px 8% 80px; /* increased top padding for nav spacing */
+      padding: 200px 8% 80px;
+      /* increased top padding for nav spacing */
       gap: 60px;
     }
 
@@ -32,8 +34,10 @@
     .product-images img {
       flex: 0 0 auto;
       scroll-snap-align: center;
-      width: 400px;       /* larger width */
-  max-height: 600px;  /* taller for better presence */
+      width: 400px;
+      /* larger width */
+      max-height: 600px;
+      /* taller for better presence */
       object-fit: cover;
       border-radius: 8px;
       cursor: pointer;
@@ -46,7 +50,7 @@
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
-      background: rgba(0,0,0,0.5);
+      background: rgba(0, 0, 0, 0.5);
       color: white;
       border: none;
       padding: 12px;
@@ -55,8 +59,14 @@
       font-size: 18px;
       z-index: 10;
     }
-   .arrow-left { left: 0; }
-.arrow-right { right: 0; }
+
+    .arrow-left {
+      left: 0;
+    }
+
+    .arrow-right {
+      right: 0;
+    }
 
 
     /* PRODUCT INFO */
@@ -83,7 +93,7 @@
       font-size: 16px;
       line-height: 1.6;
       color: var(--tweed);
-     font-family: 'Montserrat', sans-serif;
+      font-family: 'Montserrat', sans-serif;
     }
 
     .product-info button {
@@ -109,7 +119,9 @@
       align-items: center;
       flex-wrap: wrap;
     }
-    .product-options select, .product-options input {
+
+    .product-options select,
+    .product-options input {
       padding: 8px;
       font-size: 14px;
       border: 1px solid #ccc;
@@ -117,6 +129,7 @@
       width: 80px;
       text-align: center;
     }
+
     .qty-btn {
       padding: 4px 12px;
       font-size: 16px;
@@ -129,16 +142,21 @@
     .reviews {
       margin-top: 60px;
     }
+
     .reviews h2 {
       font-size: 28px;
       margin-bottom: 16px;
     }
+
     .add-review label {
       display: block;
       margin-top: 12px;
       font-weight: 500;
     }
-    .add-review input, .add-review textarea, .add-review select {
+
+    .add-review input,
+    .add-review textarea,
+    .add-review select {
       width: 100%;
       padding: 8px;
       margin-top: 4px;
@@ -146,6 +164,7 @@
       border-radius: 4px;
       font-size: 14px;
     }
+
     .add-review button {
       margin-top: 12px;
       padding: 12px 20px;
@@ -156,19 +175,55 @@
       border-radius: 6px;
       transition: background 0.3s ease;
     }
+
     .add-review button:hover {
       background: var(--olive);
     }
 
     /* Responsive */
     @media (max-width: 1024px) {
-      .product-page { flex-direction: column; }
-      .arrow-left, .arrow-right { display: none; }
-      .product-images { scroll-snap-type: x mandatory; }
-      .product-images img { width: 100%; max-height: 500px; }
+      .product-page {
+        flex-direction: column;
+      }
+
+      .arrow-left,
+      .arrow-right {
+        display: none;
+      }
+
+      .product-images {
+        scroll-snap-type: x mandatory;
+      }
+
+      .product-images img {
+        width: 100%;
+        max-height: 500px;
+      }
     }
   </style>
+  <!-- Meta Pixel Code -->
+  <script>
+    !function (f, b, e, v, n, t, s) {
+      if (f.fbq) return; n = f.fbq = function () {
+        n.callMethod ?
+        n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+      };
+      if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
+      n.queue = []; t = b.createElement(e); t.async = !0;
+      t.src = v; s = b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t, s)
+    }(window, document, 'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '1254071143201215');
+    fbq('track', 'PageView');
+  </script>
+  <noscript>
+    <img height="1" width="1" style="display:none"
+      src="https://www.facebook.com/tr?id=1254071143201215&ev=PageView&noscript=1" />
+  </noscript>
+  <!-- End Meta Pixel Code -->
 </head>
+
 <body>
 
   <!-- NAVIGATION -->
@@ -185,52 +240,56 @@
   </header>
 
   <!-- PRODUCT PAGE -->
- 
-<section class="product-page">
 
-  <!-- IMAGES -->
-  <div class="product-images-container">
-    <button class="arrow arrow-left" onclick="prevImage()">&#10094;</button>
-    <div class="product-images" id="product-images">
-      <img src="assets/images/winter/men/sandmondp2.jpeg" alt="Sandmond Front" class="active">
-      <img src="assets/images/winter/men/sandmondp3.jpeg" alt="Sandmond Back">
-      <img src="assets/images/winter/men/sandmondp.jpeg" alt="Sandmond Detail">
-    </div>
-    <button class="arrow arrow-right" onclick="nextImage()">&#10095;</button>
-  </div>
+  <section class="product-page">
 
-     <!-- PRODUCT INFO -->
-  <div class="product-info">
-    <h1>Sandmond Half-Zip Knit</h1>
-    <p class="price">₨3,500</p>
-    <p class="description">
-      Lepus brings effortless sophistication to winter layering with the Sandmond Half-Zip Knit—a minimalist essential crafted from <strong>100% soft-touch cotton</strong>. <br>
-      Each piece starts with handpicked yarns spun into breathable, insulating fabric—ideal for transitional weather or cool evenings. The sleek half-zip neckline adds functional style and adjustable warmth. <br>
-      Perfect over denim or layered over a collared shirt, it elevates any everyday look.
-    </p>
-
-    <div class="product-options">
-      <label for="size">Size:</label>
-      <select id="size" name="size" style="width:150px; font-size:16px;">
-        <option value="S">Small (S)</option>
-        <option value="M">Medium (M)</option>
-        <option value="L">Large (L)</option>
-        <option value="XL">XL</option>
-        <option value="XXL">XXL</option>
-      </select>
-      <a href="#" style="font-size:14px; margin-left:8px;">Sizing Chart</a>
-
-      <div class="quantity" style="display:flex; align-items:center; gap:4px;">
-        <button type="button" class="qty-btn" onclick="changeQty(-1)" style="padding:12px 24px; font-size:14px;">-</button>
-        <input type="number" id="qty" value="1" min="1" style="width:50px; font-size:16px; text-align:center;">
-        <button type="button" class="qty-btn" onclick="changeQty(1)" style="padding:12px 24px; font-size:14px;">+</button>
+    <!-- IMAGES -->
+    <div class="product-images-container">
+      <button class="arrow arrow-left" onclick="prevImage()">&#10094;</button>
+      <div class="product-images" id="product-images">
+        <img src="assets/images/winter/men/sandmondp2.jpeg" alt="Sandmond Front" class="active">
+        <img src="assets/images/winter/men/sandmondp3.jpeg" alt="Sandmond Back">
+        <img src="assets/images/winter/men/sandmondp.jpeg" alt="Sandmond Detail">
       </div>
+      <button class="arrow arrow-right" onclick="nextImage()">&#10095;</button>
     </div>
 
-    <button style="margin-top:12px; padding:12px 24px; font-size:16px;">Add to Cart</button>
-  </div>
+    <!-- PRODUCT INFO -->
+    <div class="product-info">
+      <h1>Sandmond Half-Zip Knit</h1>
+      <p class="price">₨3,500</p>
+      <p class="description">
+        Lepus brings effortless sophistication to winter layering with the Sandmond Half-Zip Knit—a minimalist essential
+        crafted from <strong>100% soft-touch cotton</strong>. <br>
+        Each piece starts with handpicked yarns spun into breathable, insulating fabric—ideal for transitional weather
+        or cool evenings. The sleek half-zip neckline adds functional style and adjustable warmth. <br>
+        Perfect over denim or layered over a collared shirt, it elevates any everyday look.
+      </p>
 
-</section>
+      <div class="product-options">
+        <label for="size">Size:</label>
+        <select id="size" name="size" style="width:150px; font-size:16px;">
+          <option value="S">Small (S)</option>
+          <option value="M">Medium (M)</option>
+          <option value="L">Large (L)</option>
+          <option value="XL">XL</option>
+          <option value="XXL">XXL</option>
+        </select>
+        <a href="#" style="font-size:14px; margin-left:8px;">Sizing Chart</a>
+
+        <div class="quantity" style="display:flex; align-items:center; gap:4px;">
+          <button type="button" class="qty-btn" onclick="changeQty(-1)"
+            style="padding:12px 24px; font-size:14px;">-</button>
+          <input type="number" id="qty" value="1" min="1" style="width:50px; font-size:16px; text-align:center;">
+          <button type="button" class="qty-btn" onclick="changeQty(1)"
+            style="padding:12px 24px; font-size:14px;">+</button>
+        </div>
+      </div>
+
+      <button style="margin-top:12px; padding:12px 24px; font-size:16px;">Add to Cart</button>
+    </div>
+
+  </section>
 
 
 
@@ -266,46 +325,47 @@
 
   <script>
     // QUANTITY
-  function changeQty(val) {
-    const qtyInput = document.getElementById('qty');
-    let current = parseInt(qtyInput.value);
-    current += val;
-    if(current < 1) current = 1;
-    qtyInput.value = current;
-  }
+    function changeQty(val) {
+      const qtyInput = document.getElementById('qty');
+      let current = parseInt(qtyInput.value);
+      current += val;
+      if (current < 1) current = 1;
+      qtyInput.value = current;
+    }
 
-  
 
-   // IMAGE SLIDER
-  const imagesContainer = document.getElementById('product-images');
-  const images = imagesContainer.querySelectorAll('img');
-  let currentIndex = 0;
 
-  function showImage(index) {
-    images.forEach((img, i) => {
-      img.style.display = i === index ? 'block' : 'none';
-      img.style.margin = '0 auto';
-      img.style.maxWidth = '400px'; // larger
-    });
-  }
+    // IMAGE SLIDER
+    const imagesContainer = document.getElementById('product-images');
+    const images = imagesContainer.querySelectorAll('img');
+    let currentIndex = 0;
 
-  function prevImage() {
-    currentIndex = (currentIndex - 1 + images.length) % images.length;
+    function showImage(index) {
+      images.forEach((img, i) => {
+        img.style.display = i === index ? 'block' : 'none';
+        img.style.margin = '0 auto';
+        img.style.maxWidth = '400px'; // larger
+      });
+    }
+
+    function prevImage() {
+      currentIndex = (currentIndex - 1 + images.length) % images.length;
+      showImage(currentIndex);
+    }
+
+    function nextImage() {
+      currentIndex = (currentIndex + 1) % images.length;
+      showImage(currentIndex);
+    }
+
     showImage(currentIndex);
-  }
-
-  function nextImage() {
-    currentIndex = (currentIndex + 1) % images.length;
-    showImage(currentIndex);
-  }
-
-  showImage(currentIndex);
   </script>
 
   <script src="script.js">
-   
+
 
   </script>
-  
+
 </body>
+
 </html>
